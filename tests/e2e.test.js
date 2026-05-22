@@ -1,5 +1,5 @@
 /**
- * Comprehensive E2E tests for all 70 TradingView MCP tools.
+ * Comprehensive E2E tests for all 79 TradingView MCP tools.
  * Requires TradingView Desktop running with --remote-debugging-port=9222
  *
  * Run: node --test tests/e2e.test.js
@@ -13,7 +13,7 @@
  * - UI Automation (12 tools)
  * - Replay Mode (6 tools)
  * - Alerts (3 tools)
- * - Watchlist (2 tools)
+ * - Watchlist (3 tools)
  * - Indicators (2 tools)
  * - Batch (1 tool)
  * - Capture (1 tool)
@@ -61,7 +61,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe('TradingView MCP — Full E2E (70 tools)', () => {
+describe('TradingView MCP — Full E2E (79 tools)', () => {
 
   before(async () => {
     try {
@@ -1278,7 +1278,7 @@ val = array.get(a, 5)`;
     });
   });
 
-  // ─── 9. WATCHLIST (2 tools) ───────────────────────────────────────────
+  // ─── 9. WATCHLIST (3 tools) ───────────────────────────────────────────
 
   describe('Watchlist', () => {
 
@@ -1287,7 +1287,8 @@ val = array.get(a, 5)`;
       await evaluate(`
         (function() {
           var btn = document.querySelector('[data-name="base-watchlist-widget-button"]')
-            || document.querySelector('[aria-label="Watchlist"]');
+            || document.querySelector('[data-name="base"][aria-label*="Watchlist"]')
+            || document.querySelector('[aria-label*="Watchlist"]');
           if (btn) btn.click();
         })()
       `);
@@ -1326,6 +1327,21 @@ val = array.get(a, 5)`;
       `);
       // Button may or may not be found depending on watchlist state
       assert.ok(found === null || typeof found === 'string', 'Add button detection works');
+    });
+
+    it('watchlist_remove — find row remove button', async () => {
+      const found = await evaluate(`
+        (function() {
+          var container = document.querySelector('[data-name="symbol-list-wrap"]')
+            || document.querySelector('[class*="layout__area--right"]');
+          if (!container) return null;
+          var row = container.querySelector('[data-symbol-full]');
+          if (!row) return null;
+          return !!row.querySelector('[class*="removeButton"]');
+        })()
+      `);
+      // Non-destructive check: just verify the row remove control is discoverable.
+      assert.ok(found === null || typeof found === 'boolean', 'Remove button detection works');
     });
   });
 

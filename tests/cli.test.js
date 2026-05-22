@@ -78,6 +78,14 @@ describe('CLI — help and routing', () => {
     assert.ok(stdout.includes('--count'));
     assert.ok(stdout.includes('--summary'));
   });
+
+  it('watchlist --help shows remove subcommand', () => {
+    const { stdout, exitCode } = run(['watchlist', '--help']);
+    assert.equal(exitCode, 0);
+    assert.ok(stdout.includes('get'));
+    assert.ok(stdout.includes('add'));
+    assert.ok(stdout.includes('remove'));
+  });
 });
 
 describe('CLI — pine analyze (offline)', () => {

@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { safeString, requireFinite } from '../src/connection.js';
 import { setSymbol, setTimeframe, setType, manageIndicator, setVisibleRange } from '../src/core/chart.js';
 import { drawShape } from '../src/core/drawing.js';
+import { remove as removeWatchlistSymbol } from '../src/core/watchlist.js';
 
 // ── Mock helpers ─────────────────────────────────────────────────────────
 
@@ -281,6 +282,34 @@ describe('drawing.js — sanitized evaluate calls', () => {
     const call = evaluate.calls.find(c => c.includes('createMultipointShape'));
     assert.ok(call, 'createMultipointShape called');
     assert.ok(call.includes('"trend_line"'), 'shape name via safeString');
+  });
+});
+
+// ── watchlist.js — safeString in evaluate calls ───────────────────────────
+
+describe('watchlist.js — sanitized evaluate calls', () => {
+  it('remove uses safeString for symbol lookup', async () => {
+    const evalCalls = [];
+    const evalAsyncCalls = [];
+    const evalFn = async (expr) => {
+      evalCalls.push(expr);
+      return { opened: false, already_open: true };
+    };
+    const evalAsyncFn = async (expr) => {
+      evalAsyncCalls.push(expr);
+      return { success: true, symbol: 'NASDAQ:AAPL', action: 'removed' };
+    };
+
+    const payload = "AAPL'); alert('xss'); //";
+    await removeWatchlistSymbol({
+      symbol: payload,
+      _deps: { evaluate: evalFn, evaluateAsync: evalAsyncFn },
+    });
+
+    const call = evalAsyncCalls.find(c => c.includes('targetNorm'));
+    assert.ok(call, 'watchlist remove evaluateAsync called');
+    assert.ok(call.includes(safeString(payload)), 'payload is JSON-escaped in evaluateAsync call');
+    assert.ok(!call.includes(`var target = '${payload}'`), 'no single-quoted interpolation');
   });
 });
 
