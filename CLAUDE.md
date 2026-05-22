@@ -1,6 +1,6 @@
 # TradingView MCP — Claude Instructions
 
-68 tools for reading and controlling a live TradingView Desktop chart via CDP (port 9222).
+79 tools for reading and controlling a live TradingView Desktop chart via CDP (port 9222).
 
 ## Decision Tree — Which Tool When
 
@@ -72,6 +72,11 @@ Use `study_filter` parameter to target a specific indicator by name substring (e
 - `alert_create` → set price alert (condition: "crossing", "greater_than", "less_than")
 - `alert_list` → view active alerts
 - `alert_delete` → remove alerts
+
+### "Manage watchlists"
+- `watchlist_get` → read the current watchlist
+- `watchlist_add` → add a symbol to the current watchlist
+- `watchlist_remove` → remove a symbol from the current watchlist
 
 ### "Navigate the UI"
 - `ui_open_panel` → open/close pine-editor, strategy-tester, watchlist, alerts, trading
